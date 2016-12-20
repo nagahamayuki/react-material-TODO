@@ -12,10 +12,14 @@ import Subheader from 'material-ui/Subheader';
 import Divider from 'material-ui/Divider';
 import Checkbox from 'material-ui/Checkbox';
 import Toggle from 'material-ui/Toggle';
+import ActionInfo from 'material-ui/svg-icons/action/info';
+
+import { withGoogleMap } from "react-google-maps";
 
 const style = {
   margin: 12,
 };
+
 
 class TodoInput extends React.Component{
 
@@ -44,24 +48,33 @@ class TodoInput extends React.Component{
     return(
       <div>
         <TextField
-          hintText="input your idea"
+          hintText="ここにTodoを入力"
           ref="inputText"
           value={this.state.value}
           onChange={this._onChange.bind(this)}
         />
-      <RaisedButton label="Secondary" secondary={true} style={style} onClick={this._onAdd.bind(this)} />
+        <RaisedButton label="追加" secondary={true} style={style} onClick={this._onAdd.bind(this)} />
       </div>
     );
   }
 }
 
 class TodoValue extends React.Component{
+
+  _onDelete(i){
+    this.props.onDelete(i);
+  }
+
   render(){
     return(
         <List>
           {
-            this.props.todos.map(function(todo, i){
-              return <ListItem key={i} primaryText={todo.item} />
+            this.props.todos.map((todo, i) => {
+              if(todo.status == 0){
+                return <ListItem key={i} primaryText={todo.item} rightIcon={<ActionInfo />} leftCheckbox={<Checkbox onClick={this._onDelete.bind(this, i)} />} />
+              }else{
+                return <ListItem key={i} primaryText={todo.item} />
+              }
             })
           }
         </List>
@@ -75,9 +88,10 @@ class TodoApps extends React.Component{
   constructor(){
     super();
     this.state = {
-      todos: [{item: "", status: 0}]
+      todos: []
     }
     this.onAdd = this.onAdd.bind(this);
+    this.onDelete = this.onDelete.bind(this);
   }
 
   onAdd(newTodo){
@@ -86,12 +100,21 @@ class TodoApps extends React.Component{
     });
   }
 
+  onDelete(i){
+    const targetTodo = this.state.todos[i];
+    targetTodo.status = 1;
+    console.log(targetTodo);
+    this.setState({
+      todos: this.state.todos
+    });
+  }
+
   render(){
     return(
       <MuiThemeProvider>
         <div>
           <TodoInput onAdd={this.onAdd} />
-          <TodoValue todos={this.state.todos} />
+          <TodoValue todos={this.state.todos} onDelete={this.onDelete} />
         </div>
       </MuiThemeProvider>
     );
